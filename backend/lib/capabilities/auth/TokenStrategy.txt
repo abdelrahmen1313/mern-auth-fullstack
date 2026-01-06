@@ -1,0 +1,24 @@
+Token Strategy (Clarify Responsibilities)
+
+----------------------------------------------------
+1. Public Token (Pre-Verification)
+
+-Limited scope
+-Cannot access protected resources
+
+<Can only>:
+
+-Verify OTP
+-Resend OTP
+-Logout
+------------------------------------------------------
+2. Verified Access Token
+
+**Full API access**
+
+**Issued only after:
+
+isVerified === true
+Valid session/device
+
+

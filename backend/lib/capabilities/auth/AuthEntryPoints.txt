@@ -1,0 +1,19 @@
+POST /auth/login
+
+Logic:
+
+Validate credentials
+
+Create or reuse device/session
+
+Branch:
+
+If !user.isVerified:
+
+Send OTP (rate-limited, do this later)
+
+Issue public token
+
+Else:
+
+Issue access token

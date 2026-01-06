@@ -1,0 +1,20 @@
+ADD A 2FA VERIFICATION
+
+2FA VERIFICATION IS NOT ENABLED BY DEFAULT
+
+How it works?
+  a client send a login request, the request is treated normally,
+  then we check if user.2faEnabled
+   if false
+     send a normal server response
+
+   else 
+     check if the current user device (session), is marked as trusted --> FOR THIS WE NEED TO CREATE A DEVICE HASH and provide user.devices hashmap
+      if trusted
+        proceed normally without sending a 2fa
+    
+      else
+       generate an otp,
+       send it to the user by email
+       verify-otp validity
+     
