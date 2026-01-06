@@ -49,3 +49,17 @@ export function generateSimpleRandomString(length: number): string {
     return result;
 
 }
+
+export function generateRandomNumbe(length : number) : string {
+     if (!Number.isInteger(length) || length <= 0) {
+        throw new Error("Length must be a positive integer");
+    }
+    const numbers = '123456789';
+    let result = '';
+
+    for (let i = 0; i < length; i++) {
+        result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+
+    return result;
+}

@@ -3,7 +3,8 @@ import type { Request, NextFunction, Response }
 import { AuthService } from "./auth.service.js";
 import HttpException from "../../core/Exceptions/http.exception.js";
 import { SessionService } from "../../ressources/Session/session.service.js";
-import { verifyTokenWithType } from "./auth.utils.js";
+import { VerifyPublicJWT, verifyTokenWithType } from "./auth.utils.js";
+import { success } from "zod";
 
 const authService = new AuthService();
 const sessionService = new SessionService();
@@ -38,7 +39,7 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
 // POST LOGIN - Authenticate user and create session
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const  user  = req.body.user;
+        const user = req.body.user;
         const browserPreferences = req.body.browserPreferences;
 
         console.log(user);
@@ -94,6 +95,26 @@ export async function logoutForAllDevices(req: Request, res: Response, next: Nex
     }
 }
 
+// verify public session
+export async function verifyPublicToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const authHeader = req.get("authorization");
+    if (!authHeader) {
+        throw new HttpException(401, 'Token Not Provided')
+    }
+
+    // Extract token (handle "Bearer <token>" format)
+    const token = authHeader.startsWith("Bearer ")
+        ? authHeader.substring(7)
+        : authHeader;
+
+    const payload =  VerifyPublicJWT(token);
+    if (payload.isValid === false) {
+        throw new HttpException(403, 'INVALID OR EXPIRED TOKEN')
+    }
+    next()
+
+}
+
 // verify public token
 
 // GET VERIFY TOKEN VALIDITY - Check if session is valid and has appropriate access
@@ -112,9 +133,12 @@ export async function authenticateToken(req: Request, res: Response, next: NextF
             ? authHeader.substring(7)
             : authHeader;
 
+            // Determine if route is public-accessible
+        const isPublicRoute = PUBLIC_ROUTES.some(route => requestPath.includes(route));
+            /*
         if (!sessId) {
             throw new HttpException(401, "Session ID is required");
-        }
+        } */
 
         // Verify token type
         const tokenVerification = await verifyTokenWithType(token);
@@ -123,6 +147,10 @@ export async function authenticateToken(req: Request, res: Response, next: NextF
         }
 
         // Verify session
+        if (sessId === "" && isPublicRoute) {
+            return next()
+        }
+
         const sessionVerification = await sessionService.verifySession(sessId);
         if (!sessionVerification.isValid) {
             throw new HttpException(401, "Invalid or expired session");
@@ -133,8 +161,7 @@ export async function authenticateToken(req: Request, res: Response, next: NextF
             throw new HttpException(401, "Token does not match session");
         }
 
-        // Determine if route is public-accessible
-        const isPublicRoute = PUBLIC_ROUTES.some(route => requestPath.includes(route));
+        
 
         // If accessing a protected route, require verified session
         if (!isPublicRoute && !sessionVerification.isVerified) {
@@ -204,6 +231,9 @@ export async function verifyOtp(req: Request, res: Response, next: NextFunction)
         const otp = req.body.otp;
         const userId = req.body.user.userId;
 
+        console.log(otp);
+        console.log(userId);
+
         const otpValidation = await authService.validateOtp(userId, otp)
         if (otpValidation?.valid === false) {
             throw new HttpException(403, otpValidation.reason)
@@ -244,9 +274,9 @@ export async function validateUser(req: Request, res: Response, next: NextFuncti
 // resend otp
 export async function resendOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const {userId , email} = req.body.user
+        const { userId, email } = req.body.user
         await authService.resendOtp(userId, email)
-        res.status(200).json({message : "OTP SENT"})
+        res.status(200).json({ message: "OTP SENT" })
 
     } catch (error) {
         next(error)

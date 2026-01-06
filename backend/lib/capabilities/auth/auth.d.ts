@@ -17,6 +17,7 @@ export interface AuthResponse {
     deviceId?: string;
     token: string;
     verified: boolean;
+    email? : string;
 }
 
 export interface sessionUser {

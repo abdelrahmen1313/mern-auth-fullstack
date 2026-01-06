@@ -89,7 +89,7 @@ export class SessionService {
 
     async verifySession(sessionId: string): Promise<{
         isValid: boolean;
-        isVerified: boolean;
+        isVerified?: boolean;
         userId?: string;
         sessionToken?: string;
     }> {
@@ -102,7 +102,7 @@ export class SessionService {
                 session.lastRevoked === true ||
                 (session.expiredAtTimestamp as number) < Date.now()
             ) {
-                return { isValid: false, isVerified: false };
+                return { isValid: false};
             }
             return {
                 isValid: true,

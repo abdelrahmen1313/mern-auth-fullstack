@@ -1,11 +1,11 @@
 import { type Route } from "../../core/Interfaces/Route.interface.js";
-import { authenticateToken, signup, login, logout, logoutForAllDevices, verifyOtp, validateUser } from "./auth.middleware.js";
+import { authenticateToken, signup, login, logout, logoutForAllDevices, verifyOtp, validateUser, resendOtp, verifyPublicToken } from "./auth.middleware.js";
 import type { Request, NextFunction, Response, RequestHandler } from "express";
 const allowedOrigins = new Set([
     // Common local dev origins (no trailing slash)
     "http://localhost:3000",
     "http://localhost:8080",
-   
+
     "http://127.0.0.1:8080",
 ]);
 
@@ -27,7 +27,7 @@ export function CorsMiddlewareAuth(req: Request, res: Response, next: NextFuncti
         res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         res.header("Access-Control-Allow-Headers", "Content-Type, authorization,X-SESSID,X-DEVICE-ID");
         // Quick exit for preflight
-    
+
         return next();
     }
 
@@ -70,11 +70,17 @@ class authRoutes {
             },
             {
                 path: '/verify-otp',
-                "method": "post",
+                method: "post",
                 handler: [verifyOtp, validateUser]
+            },
+            {
+                path: '/resend-otp',
+                method: "post",
+                handler: [verifyPublicToken, resendOtp]
             }
         ]
     }
 }
 
 export default authRoutes;
+

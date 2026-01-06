@@ -18,25 +18,18 @@ export const validatePassword = async (password: string, hashedPassword: string)
 const h_secret = process.env.jwt_h_secret?.toString() || ""
 const v_secret = process.env.jwt_refresh_secret?.toString() || ""
 
-export async function verify(token: string, method: string) {
-
-
-    try {
-        let secret;
-
-        if (method.toUpperCase() === "PUBLIC") {
-            secret = h_secret
-        } else {
-            secret = v_secret
-        }
-
-        return jwt.verify(token, secret)
-        
-    } catch (error) {
-        return false
-    }
+export  function VerifyPublicJWT(token : string) : {
+     isValid: boolean;
+    tokenType: 'public' | 'verified' | null;
+    payload: any;
 }
-
+{
+    
+        const payload = jwt.verify(token, h_secret)
+        if (!payload){ return {isValid : false, tokenType : null, payload : null} }
+        return { isValid: true, tokenType: 'public', payload };
+   
+}
 /**
  * Verify token and return its type
  * @returns { isValid: boolean, tokenType: 'public' | 'verified' | null, payload: any }
@@ -65,7 +58,7 @@ export async function verifyTokenWithType(token: string): Promise<{
 }
 
 export async function createToken(email: string): Promise<string> {
-    return jwt.sign({ id: email }, h_secret, { expiresIn: "60MINUTES" })
+    return jwt.sign({ id: email }, h_secret, { expiresIn: "60DAYS" })
 }
 
 export async function createVerifiedToken(email: string): Promise<string> {

@@ -19,7 +19,6 @@ export async function sendVerificationEmail(receiver: string, OTP : string): Pro
         html: VERIFICATION_EMAIL_TEMPLATE.replace('{verificationCode}', OTP)
     };
 
-    console.log(mailOptions)
 
     await transporter.sendMail(mailOptions);
 }

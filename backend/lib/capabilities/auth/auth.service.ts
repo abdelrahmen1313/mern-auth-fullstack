@@ -6,7 +6,7 @@ import type { AuthResponse, SignupRequest, LoginRequest }
     from "./auth.js";
 import type { otpPurpose }
     from "../otp/otp.js";
-import { generateSimpleRandomString } from "../../utils/stringUtils.js";
+import { generateRandomNumbe, generateSimpleRandomString } from "../../utils/stringUtils.js";
 import { OtpRepository } from "../otp/otp.repository.js";
 import { sendVerificationEmail } from "../../core/internalServices/Email/email.service.js";
 import { createOTPExpDate, hashOtp, verifyOtp } from "../otp/otp.utils.js";
@@ -28,7 +28,7 @@ export class AuthService {
      */
     private async generateAndSendOtp(userId: string, email: string, purpose: otpPurpose = 'signup_verification'): Promise<void> {
         // Generate OTP
-        const otp = generateSimpleRandomString(6);
+        const otp = generateRandomNumbe(6);
 
         // Save OTP to database
         await this
@@ -64,9 +64,6 @@ export class AuthService {
                     password: hashedPassword
                 });
 
-            console.log("new User ", newUser)
-            console.log(newUser._id.toString())
-            console.log(newUser.email.trim())
 
             // Step 5: Generate OTP, save to db, and send verification email
             await this.generateAndSendOtp(newUser._id.toString(), credentials.email, 'signup_verification');
@@ -86,8 +83,11 @@ export class AuthService {
                 userId: newUser
                     ._id
                     .toString(),
+                email : newUser.email.trim(),
                 verified: false,
-                token: session.sessionToken
+                token: session.sessionToken,
+                sessId : session._id.toString(),
+                deviceId : session.deviceId
             };
         } catch (error) {
             if (error instanceof AppError) {
