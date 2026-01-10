@@ -11,10 +11,14 @@ export class SessionService {
         this.sessionRepository = new SessionRepository();
     }
 
-    async createUserSession(user: sessionUser, TTL: number, browserPreferences?: any, isVerifiedSession: boolean = false) {
+
+
+    async createUserSession( user: sessionUser, TTL: number, browserPreferences?: any, isVerifiedSession: boolean = false, ip? : string) {
+
 
         try {
 
+            
             // create token
             const token = isVerifiedSession
                 ? await createVerifiedToken(user.email + user.id)
@@ -34,6 +38,7 @@ export class SessionService {
                 lastRevoked: false,
                 expiresAt: expiresAt,
                 expiresAtTimestamp: expiresAtTimestamp,
+                ip : ip || undefined,
                 isVerified: isVerifiedSession, // Track session verification status
                 ...(browserPreferences && { deviceFingerPrint: browserPreferences }),
             }
@@ -71,6 +76,8 @@ export class SessionService {
                     expiresAt: expiresAt,
                     expiresAtTimestamp: expiresAtTimestamp,
                     isVerified: isVerifiedSession,
+                     ip : ip || undefined,
+          
                 };
 
                 return await this.sessionRepository.createSession(sessionDataFallback);
@@ -102,7 +109,7 @@ export class SessionService {
                 session.lastRevoked === true ||
                 (session.expiredAtTimestamp as number) < Date.now()
             ) {
-                return { isValid: false};
+                return { isValid: false };
             }
             return {
                 isValid: true,

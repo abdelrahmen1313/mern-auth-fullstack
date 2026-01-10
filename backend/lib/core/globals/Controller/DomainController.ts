@@ -1,6 +1,6 @@
 import { Router, type RequestHandler } from "express";
-import type { Controller } from "../../core/Interfaces/Controller.interface.js";
-import type { Route } from "../../core/Interfaces/Route.interface.js";
+import type { Controller } from "../../Interfaces/Controller.interface.js";
+import type { Route } from "../../Interfaces/Route.interface.js";
 
 type RoutesProvider = {
   getRoutes: () => Route[];
@@ -26,7 +26,7 @@ abstract class DomainController implements Controller {
         this.router.use(middleware);
       });
     }
-  } // Or you can just use it at initiate middlewares with "/Route",middleware
+  } 
 
   protected initiateRoutes(): void {
     this.routes.forEach((route) => {

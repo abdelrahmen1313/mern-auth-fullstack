@@ -2,33 +2,32 @@ import bcrypt from 'bcryptjs';
 import jwt from "jsonwebtoken";
 
 export const hashPassword = async (password: string): Promise<string> => {
-  const saltRounds = 2;
-  const secret = process.env.u_pwd_hash_secret;
-  const hashedPassword = await bcrypt.hash(secret + password, saltRounds);
-  return hashedPassword;
+    const saltRounds = 2;
+    const secret = process.env.u_pwd_hash_secret;
+    const hashedPassword = await bcrypt.hash(secret + password, saltRounds);
+    return hashedPassword;
 };
 
 export const validatePassword = async (password: string, hashedPassword: string): Promise<boolean> => {
-  const secret = process.env.u_pwd_hash_secret;
-  // Must compare against the same plaintext used in hashPassword: secret + password
-  return await bcrypt.compare(String(secret) + password, hashedPassword);
+    const secret = process.env.u_pwd_hash_secret;
+    // Must compare against the same plaintext used in hashPassword: secret + password
+    return await bcrypt.compare(String(secret) + password, hashedPassword);
 }
 
 
 const h_secret = process.env.jwt_h_secret?.toString() || ""
 const v_secret = process.env.jwt_refresh_secret?.toString() || ""
 
-export  function VerifyPublicJWT(token : string) : {
-     isValid: boolean;
+export function VerifyPublicJWT(token: string): {
+    isValid: boolean;
     tokenType: 'public' | 'verified' | null;
     payload: any;
-}
-{
-    
-        const payload = jwt.verify(token, h_secret)
-        if (!payload){ return {isValid : false, tokenType : null, payload : null} }
-        return { isValid: true, tokenType: 'public', payload };
-   
+} {
+
+    const payload = jwt.verify(token, h_secret)
+    if (!payload) { return { isValid: false, tokenType: null, payload: null } }
+    return { isValid: true, tokenType: 'public', payload };
+
 }
 /**
  * Verify token and return its type
@@ -64,3 +63,4 @@ export async function createToken(email: string): Promise<string> {
 export async function createVerifiedToken(email: string): Promise<string> {
     return jwt.sign({ id: email }, v_secret, { expiresIn: "460DAYS" })
 }
+

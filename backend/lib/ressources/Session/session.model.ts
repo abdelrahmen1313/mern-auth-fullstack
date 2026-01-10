@@ -1,34 +1,7 @@
-import { Document, Schema, model, type ObjectId } from "mongoose";
+import { Document, Schema, model, type ObjectId, type SaveOptions } from "mongoose";
 
-export interface ISession extends Document {
-    userId: string,
-    sessionToken: string,
-    deviceId: string,
-    ip?: string,
-    createdAt: string,
-    lastUsedAt?: Date,
-    expiresAt?: Date,
-    lastRevoked?: Boolean,
-    expiredAtTimestamp: number,
-    isVerified : boolean
-}
-
-export interface screen {
-    width: number,
-    height: number,
-    colorDepth: number,
-    pixelDepth: number
-}
-
-export interface IDevice extends Document {
-    userAgent: string,
-    platform: string,
-    language: string,
-    screen: string,
-    timezone: string,
-    clientTimestamp: number
-
-}
+import type { ISession, IDevice , screen } from "./session.js";
+import { getSessionLocation } from "./session.utils.js";
 
 const deviceSchema = new Schema({
     userAgent: {
@@ -56,11 +29,14 @@ const sessionSchema = new Schema({
     userId: {
         type: "string",
         required: true,
-
     },
     sessionToken: {
         type: "string",
-        unique: true,
+        required: true,
+    },
+    refreshToken : {
+        type : "string",
+        default: function (this: ISession) { return this.sessionToken; },
     },
     deviceId: {
         type: "string",
@@ -79,11 +55,10 @@ const sessionSchema = new Schema({
     },
     expiresAt: {
         type: Schema.Types.Date,
-        // required: true,
+        required: true,
     },
     expiredAtTimestamp: {
         type: Schema.Types.Number,
-
     },
     lastRevoked: {
         type: Schema.Types.Boolean,
@@ -94,10 +69,32 @@ const sessionSchema = new Schema({
         default: false
     },
 
+    country : {
+        type : "string"
+    },
+    city : {
+        type : "string"
+    },
+
     deviceFingerPrint: deviceSchema
 
 })
-// add indexes later
+
+// TTL index ensures sessions are removed automatically after `expiresAt`
+sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+
+sessionSchema.pre("save", async function (this : ISession) {
+    if (this.ip) {
+        const {country , city} = await getSessionLocation(this.ip)
+        if (typeof country == "string" && typeof city == "string") {
+            this.country = country;
+            this.city = city;
+        }
+    }
+})
+
+
+
 
 const Session = model<ISession>("Session", sessionSchema);
 export default Session;
