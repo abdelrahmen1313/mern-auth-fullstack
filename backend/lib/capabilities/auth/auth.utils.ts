@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from "jsonwebtoken";
 
 export const hashPassword = async (password: string): Promise<string> => {
-    const saltRounds = 2;
+    const saltRounds = 12;
     const secret = process.env.u_pwd_hash_secret;
     const hashedPassword = await bcrypt.hash(secret + password, saltRounds);
     return hashedPassword;

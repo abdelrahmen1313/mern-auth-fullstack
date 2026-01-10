@@ -2,8 +2,7 @@ import { Types, type QueryFilter } from "mongoose"
 import { MongoDbRepository } from "../../core/repostitory/mdbRepo.js"
 import type { IResetToken, saveTokenDTO } from "./resetToken.js"
 import resetTokenModel from "./resetToken.model.js"
-import { createTokenHash } from "./resetToken.utils.js"
-import { createExpiresAt } from "../../utils/utils.js"
+
 
 interface updateTokenDto {
     resetTokenHash : string,
@@ -16,6 +15,10 @@ export class ResetTokenRepository extends MongoDbRepository<IResetToken> {
     }
 
     // METHODS //
+
+    deleteToken = async (tokenId : string) => {
+        return this.safeExec(() => this.model.findByIdAndDelete(tokenId))
+    }
 
     /** CREATE (SAVE) ResetToken */
     saveResetToken = async (tokenData: saveTokenDTO) => {
@@ -40,22 +43,18 @@ export class ResetTokenRepository extends MongoDbRepository<IResetToken> {
 
     /** Incerement Attempts */
     incrementAttempts = async (tokenId: string | undefined) => {
-        return this.safeExec(() => this.model.findByIdAndUpdate({ tokenId }, { $inc: { attempts: 1 } }, { new : true}))
+        return this.safeExec(() => this.model.findByIdAndUpdate( tokenId , { $inc: { attempts: 1 } }, { new : true}))
     }
 
     /** Update Token by id */
     updateTokenWithId = async (tokenId : string, updates : updateTokenDto) => {
-        return this.safeExec(() => this.model.findByIdAndUpdate({ tokenId }, updates, {new : true}))
+        return this.safeExec(() => this.model.findByIdAndUpdate( tokenId , updates, {new : true}))
     } 
 
-    /** Create Refresh Token (update existing document) */
-    createRefreshToken = async (tokenId : string) => {
-        //const id = new Types.ObjectId(tokenId)
-        const _refreshToken = createTokenHash(16)
-        const { expiresAt } = createExpiresAt(15); // 15 minutes TTL
-        const expDate = new Date(expiresAt)
-        return this.safeExec( () => this.model.findByIdAndUpdate( tokenId , { $set : { resetTokenHash : _refreshToken , expiresAt : expDate}, $inc : {attempts : 1}} , { new : true }) )
-    }
+   // ** consume token ** //
+   consumeToken = async (tokenHash : string) => {
+    return this.safeExec(() => this.model.findOneAndUpdate({ tokenHash : tokenHash}, { $set : { isConsumed : true} } , { new : true}))
+   }
 
     /** Delete a token -userId- */
     deleteUserResetToken = async (userId: string) => {
