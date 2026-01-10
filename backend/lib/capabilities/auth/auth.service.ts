@@ -6,7 +6,7 @@ import type { AuthResponse, SignupRequest, LoginRequest }
     from "./auth.js";
 import type { otpPurpose }
     from "../otp/otp.js";
-import { generateRandomNumbe, generateSimpleRandomString } from "../../utils/stringUtils.js";
+import { generateRandomNumbe } from "../../utils/stringUtils.js";
 import { OtpRepository } from "../otp/otp.repository.js";
 import { sendVerificationEmail } from "../../core/internalServices/Email/email.service.js";
 import { createOTPExpDate, hashOtp, verifyOtp } from "../otp/otp.utils.js";
@@ -43,7 +43,7 @@ export class AuthService {
      * SIGNUP - Create a new user and session
      * If deviceFingerprint is not provided, the session will still be created without it
      */
-    async signup(credentials: SignupRequest, browserPreferences?: any): Promise<AuthResponse> {
+    async signup(credentials: SignupRequest, ip : string , browserPreferences?: any): Promise<AuthResponse> {
         try {
             // Step 1: Check if user already exists
             const existingUser = await this
@@ -101,7 +101,7 @@ export class AuthService {
     /**
      * LOGIN - Authenticate user and create a session
      */
-    async login(credentials: LoginRequest, browserPreferences?: any): Promise<AuthResponse> {
+    async login(ip : string, credentials: LoginRequest, browserPreferences?: any): Promise<AuthResponse> {
         try {
             // Step 1: Find user by email
             const user = await this
@@ -123,14 +123,18 @@ export class AuthService {
                 : 600
             const session = await this
                 .sessionService
-                .createUserSession({
-                    id: user
-                        ._id
-                        .toString(),
+                .createUserSession(
+                    {
+                    id: user._id.toString(),
                     email: user.email
-                }, sessionTTL, browserPreferences, user.isVerified
+                }, 
+                sessionTTL, 
+                browserPreferences,
+                 user.isVerified
                     ? true
-                    : false);
+                    : false,
+                    ip
+                );
 
             return {
                 success: true,

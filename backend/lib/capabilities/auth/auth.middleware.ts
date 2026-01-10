@@ -3,7 +3,7 @@ import type { Request, NextFunction, Response }
 import { AuthService } from "./auth.service.js";
 import HttpException from "../../core/Exceptions/http.exception.js";
 import { SessionService } from "../../ressources/Session/session.service.js";
-import { VerifyPublicJWT, verifyTokenWithType } from "./auth.utils.js";
+import {  VerifyPublicJWT, verifyTokenWithType } from "./auth.utils.js";
 import { success } from "zod";
 
 const authService = new AuthService();
@@ -27,7 +27,9 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
             throw new HttpException(400, "Invalid credentials. Email and password are required.");
         }
 
-        const result = await authService.signup(user, browserPreferences);
+        const _ip = req.ip as string;
+
+        const result = await authService.signup(user, _ip, browserPreferences);
         res
             .status(201)
             .json(result);
@@ -39,17 +41,17 @@ export async function signup(req: Request, res: Response, next: NextFunction): P
 // POST LOGIN - Authenticate user and create session
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const user = req.body.user;
+        let user = req.body.user;
         const browserPreferences = req.body.browserPreferences;
 
-        console.log(user);
-        console.log(browserPreferences);
 
         if (!user || !user.email || !user.password) {
             throw new HttpException(400, "Invalid credentials. Email and password are required.");
         }
+       
+        const _ip = req.ip as string;
 
-        const result = await authService.login(user, browserPreferences);
+        const result = await authService.login(_ip , user, browserPreferences);
         console.log(result)
         res
             .status(201)

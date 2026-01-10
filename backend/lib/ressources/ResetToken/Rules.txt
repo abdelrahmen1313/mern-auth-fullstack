@@ -1,0 +1,28 @@
+- One Active ResetToken Per User - Done~
+- TTL index on expiresAt (done) 
+- Hard Limit on Attempts -- USE RATE LIMITING FOR A BETTER SECURITY
+
+////////////////////////////////////
+To Create reset password request, a user should have
+  1. UserId
+  . then => We will give him a resetPassword Link
+
+To validate a reset password Request, the server must check
+  1. Token Validity => (isConsumed?, tokenExist??) // NOTE : resetTokens are self destroyables with mongoose, so an expired token will be 'not found'
+  2. Optional : ::: UserOwnership
+
+User -> Server Contract : 
+   Shape of the verificationURL : `API_URL/userId/tokenHash`
+
+Verify Token Validity Procees 
+ Needs : userId, tokenHash
+ steps : 
+   one : findToken(tokenHash)
+   two : Token Validity => (isConsumed?, tokenExist??)
+   three :
+     if (Valid) : 
+       createVerificationUrl(userId, tokenHash)
+     else :
+       throw new httpException
+
+DO NOT WRITE XOOXO COMMENTS WHEN YOU WORK WITH A TEAM

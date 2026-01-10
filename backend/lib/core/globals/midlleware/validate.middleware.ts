@@ -1,6 +1,6 @@
 // src/middleware/validateMiddleware.ts
 import { type Request,type Response, type NextFunction } from "express";
-import HttpException from "../Exceptions/http.exception.js";
+import HttpException from "../../Exceptions/http.exception.js";
 /**
  * @param fileName - The schema file name (without extension)
  * @param schemaKey - The specific schema export name inside that file

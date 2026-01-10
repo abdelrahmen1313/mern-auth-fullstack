@@ -16,8 +16,22 @@ with a virtual device id, and other attributes.
 we do not rotate tokens for now, but by logging out, the user will destroy his current session
 the user can also destroy all active sessions if authenticated from a trusted device.
 
-## IMPROVEMENTS
+## TRUSTED DEVICE APPROACH
 
-We think of creating a physical device id, which is pratically doable (with caution),
-so we can mark the client trusted device instead of creating a virtual device everytime he access the api.
-or we can mix them in a hybrid approach.
+This is a crucial cornerstone for setting up a 2-Factor-Authentication System.
+
+- Improvised appraoch : (foundational)
+
+  I. At Client -> DeviceFingerprintObject::Hash + Timestamp(ms) => 4aazdsdq58cx.125
+  II. At Server -> add A server Timestamp + ipHash => 4aazdsdq58cx.125.32.4easdeXs
+  II. Persistance -> Save The created deviceId inside the created session + user.Devices
+
+- Application of the method
+  
+  on : Login -> after checking user existance, 
+                we compare the deviceHash with the client BrowserPreferencesHash
+                if (found) // provided device is under user.devices
+                   A trusted device, will short circuit 2fa,
+                Else
+                   Proceed to 2fa pipeline -> generate OTP, send OTP with email (verification link)
+THE HACK HERE, is to provide necessary data (userAgent, platform and maybe a location), For a device management UI
