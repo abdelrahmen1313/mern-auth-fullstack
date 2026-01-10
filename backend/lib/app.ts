@@ -1,9 +1,9 @@
 import express, { type Application } from "express";
 import { connectDb } from "./utils/connectDb.js";
-import ErrorMidlleware from "./core/globals/midlleware/error.middleware.js";
-import logger from "./core/globals/midlleware/logger.middleware.js";
+import ErrorMidlleware from "./core/globals/middleware/error.middleware.js";
+import logger from "./core/globals/middleware/logger.middleware.js";
 import type { Controller } from "./core/Interfaces/Controller.interface.js";
-import { CorsMiddlewareStar } from "./core/globals/midlleware/cors.middleware.js";
+import { CorsMiddlewareStar } from "./core/globals/middleware/cors.middleware.js";
 
 
 
