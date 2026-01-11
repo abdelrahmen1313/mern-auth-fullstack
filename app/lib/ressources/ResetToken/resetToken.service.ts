@@ -30,7 +30,7 @@ export class ResetTokenService {
 
 
     generatePasswordResetUrl = async (tokenHash: string, userId: string) => {
-        return `http://localhost:8080/reset-password/${tokenHash}/${userId}`
+        return `http://localhost:3003/reset-password/${tokenHash}/${userId}`
     }
 
     /** request reset password */

@@ -1,7 +1,0 @@
-[build]
-  base = "backend"
-  command = "npm install && npm run build"
-  publish = "backend/dist"
-
-[functions]
-  directory = "netlify/functions"

@@ -1,5 +1,6 @@
 import { MongoDbRepository } from "../../core/repostitory/mdbRepo.js"
-import Session, { type ISession } from "./session.model.js"
+import Session from "./session.model.js"
+import type { ISession } from "./session.js"
 
 
 export class SessionRepository extends MongoDbRepository<ISession> {
